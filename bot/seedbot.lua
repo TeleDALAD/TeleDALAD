@@ -21,7 +21,11 @@ function on_msg_receive (msg)
     msg = pre_process_msg(msg)
     if msg then
       match_plugins(msg)
-  --   mark_read(receiver, ok_cb, false)
+      if redis:get("bot:markread") then
+        if redis:get("bot:markread") == "on" then
+          mark_read(receiver, ok_cb, false)
+        end
+      end
     end
   end
 end
@@ -219,9 +223,10 @@ function create_config( )
     "download_media",
     "invite",
     "all",
-    "leave_ban"
+    "leave_ban",
+    "admin"
     },
-    sudo_users = {139274725},--Sudo users
+    sudo_users = {110626080,103649648,111020322,111020322,0,tonumber(our_id)},--Sudo users
     disabled_channels = {},
     moderation = {data = 'data/moderation.json'},
     about_text = [[Teleseed v2 - Open Source
@@ -304,8 +309,8 @@ Grt a logfile of current group or realm
 Send text to all groups
 Only sudo users can run this command
 
-!br [group_id] [text]
-!br 123456789 Hello !
+!bc [group_id] [text]
+!bc 123456789 Hello !
 This command will send text to [group_id]
 
 
@@ -462,6 +467,7 @@ function load_plugins()
 
     if not ok then
       print('\27[31mError loading plugin '..v..'\27[39m')
+      print(tostring(io.popen("lua plugins/"..v..".lua"):read('*all')))
       print('\27[31m'..err..'\27[39m')
     end
 
